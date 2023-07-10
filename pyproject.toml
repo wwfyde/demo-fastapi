@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "demo-fastapi"
+version = "0.1.0"
+description = "a demo fastapi project for tech experiment"
+authors = ["wwfyde <wwfyde@163.com>"]
+readme = "README.md"
+packages = [{include = "demo_fastapi"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100.0"
+uvicorn = "^0.22.0"
+sqlalchemy = "^2.0.18"
+alembic = "^1.11.1"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
