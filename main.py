@@ -1,11 +1,17 @@
+import sys
+
 import dotenv
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.core.config import settings
 
+app = FastAPI(debug=True, title='FastAPI演示程序', version='0.1.0')
+
+print(f"sys.path: { sys.path }")
 
 @app.get("/")
 async def root():
+    print(settings)
     return {"message": "Hello World"}
 
 

@@ -1,0 +1,1 @@
+postgres_dsn: postgresql://postgres:wawawa@localhost:5432/django_postgres_docker

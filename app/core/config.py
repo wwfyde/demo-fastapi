@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     PROJECT_DIR: str | DirectoryPath = BASE_DIR.parent
     PGUSER: str = os.getenv('PGUSER')
     PGPASS: str = os.getenv('PGPASS')
-    POSTGRES_DSN: PostgresDsn = f"postgres://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
+    POSTGRES_DSN: PostgresDsn = f"postgresql+psycopg://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     print(PGUSER)
     assert PGUSER == 'postgres'
 
