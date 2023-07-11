@@ -1,14 +1,24 @@
+print(__name__, __package__)
 import sys
+from typing import Annotated
 
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
-from db import models, schemas, crud
-from db.session import SessionLocal, engine
+from uvicorn import run
 
 print(f"sys.path: { sys.path }")
 
+from app.db import models, schemas, crud
+from app.db.session import SessionLocal, engine
+
+from app import log
+
+
 app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 # Dependency
 
 
@@ -22,10 +32,16 @@ def get_db():
 
 models.Base.metadata.create_all(bind=engine)
 
-
+log.info("hello, 世界!")
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.get("/item/")
+async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
+    log.info("hello")
+    return {"token": token}
 
 
 @app.get("/hello/{name}")
@@ -72,3 +88,10 @@ def create_item_for_user(
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
+
+
+if __name__ == "__main__":
+    print(__name__, __package__)
+    run(app='main:app', reload=True, port=8199, workers=4)
+
+    pass

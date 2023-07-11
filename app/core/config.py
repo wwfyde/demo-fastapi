@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     PGPASS: str = os.getenv('PGPASS')
     POSTGRES_DSN: PostgresDsn = f"postgresql+psycopg://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     print(PGUSER)
+    log_file_path: str | DirectoryPath = BASE_DIR.joinpath("log")
     assert PGUSER == 'postgres'
 
 
