@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 # from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from core.config import settings
-from core.config2 import postgres_dsn
+from app.core.config import settings
+from app.core.config2 import postgres_dsn
 
 dsn = settings.POSTGRES_DSN
 
