@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "a demo fastapi project for tech experiment"
 authors = ["wwfyde <wwfyde@163.com>"]
 readme = "README.md"
-packages = [{include = "demo_fastapi"}]
+#packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -13,8 +13,10 @@ uvicorn = "^0.22.0"
 sqlalchemy = "^2.0.18"
 alembic = "^1.11.1"
 requests = "^2.31.0"
-psycopg = {extras = ["pool"], version = "^3.1.9"}
+psycopg = { extras = ["pool"], version = "^3.1.9" }
 psycopg2-binary = "^2.9.6"
+python-jose = { extras = ["cryptography"], version = "^3.3.0" }
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 
 [build-system]

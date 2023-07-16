@@ -18,7 +18,12 @@ class Settings(BaseSettings):
         pass
 
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+
+    # SECRET_KEY: str = secrets.token_urlsafe(32)
+    # use "openssl rand -hex 32" to generate a secure random secret key
+    SECRET_KEY: str = "7212718542579599fe8923e3bf1632862d13f636def7d0cdd60a1765a10553d5"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     PROJECT_NAME: str = 'demo-fastapi'
     BASE_DIR: str | DirectoryPath = BASE_DIR
     PROJECT_DIR: str | DirectoryPath = BASE_DIR.parent

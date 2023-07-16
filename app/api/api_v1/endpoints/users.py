@@ -1,14 +1,50 @@
+from datetime import timedelta, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 from requests import Session
+from starlette import status
 
-from app import log, schemas, crud
-from app.api.deps import oauth2_scheme, get_current_active_user, fake_users_db, fake_hash_password, get_db
+from app import log, schemas, crud, settings
+from app.api.deps import oauth2_scheme, get_current_active_user, fake_users_db, fake_hash_password, get_db, get_user
+from app.schemas.token import Token
 from app.schemas.user import User, UserInDB
 
 router = APIRouter()
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+def authenticate_user(fake_db, username: str, password: str):
+    user = get_user(fake_db, username)
+    if not user:
+        return False
+    # Note: password_hash
+    if not verify_password(password, get_password_hash(password)):
+        return False
+    return user
+
+
+def create_access_token(data: dict, expire_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expire_delta:
+        expire = datetime.utcnow() + expire_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return encoded_jwt
 
 
 @router.get("/")
@@ -27,19 +63,36 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_active
     return current_user
 
 
-@router.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    # 从数据库获取用户信息
-    user_dict = fake_users_db.get(form_data.username)
-    if not user_dict:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    # check password
-    user = UserInDB(**user_dict)
-    hashed_password = fake_hash_password(form_data.password)
-    if not hashed_password:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    return {"access_token": user.username, "token_type": "bearer"}
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    # 用户认证
+    log.info(f"{fake_users_db}, {form_data.username}, {form_data.password}")
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expire_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+    #
+    # # 从数据库获取用户信息
+    # user_dict = fake_users_db.get(form_data.username)
+    # if not user_dict:
+    #     raise HTTPException(status_code=400, detail="Incorrect username or password")
+    # # check password
+    # user = UserInDB(**user_dict)
+    # hashed_password = fake_hash_password(form_data.password)
+    # if not hashed_password:
+    #     raise HTTPException(status_code=400, detail="Incorrect username or password")
+    #
+    # return {"access_token": user.username, "token_type": "bearer"}
 
 
 @router.post("/users/", response_model=schemas.user.User)
