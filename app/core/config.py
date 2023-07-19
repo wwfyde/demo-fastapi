@@ -29,7 +29,10 @@ class Settings(BaseSettings):
     PROJECT_DIR: str | DirectoryPath = BASE_DIR.parent
     PGUSER: str = os.getenv('PGUSER')
     PGPASS: str = os.getenv('PGPASS')
-    POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
+    # TODO set container ip
+    POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@postgres:5432/demo_fastapi"
+    # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@172.18.0.2:5432/demo_fastapi"
+    # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     print(PGUSER)
     log_file_path: str | DirectoryPath = BASE_DIR.joinpath("log")
     assert PGUSER == 'postgres'

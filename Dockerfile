@@ -11,6 +11,8 @@ RUN pip install -r requirements.txt  --no-cache-dir
 #apt-get install -y --no-install-recommends git
 #EOF
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV TZ=Asia/Shanghai
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 EXPOSE 8000
