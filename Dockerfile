@@ -1,4 +1,6 @@
 FROM python:3-slim-buster  AS builder
+ENV TZ="Asia/Shanghai"
+#ENV PYTHONPATH=/app
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ RUN pip install -r requirements.txt  --no-cache-dir
 #apt-get install -y --no-install-recommends git
 #EOF
 
-ENV TZ=Asia/Shanghai
+
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 

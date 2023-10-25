@@ -7,16 +7,19 @@ readme = "README.md"
 #packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-fastapi = "^0.100.0"
-uvicorn = "^0.22.0"
+python = "^3.12"
+fastapi = "^0.104.0"
+uvicorn = "^0.23.2"
 sqlalchemy = "^2.0.18"
 alembic = "^1.11.1"
 requests = "^2.31.0"
-psycopg = { extras = ["pool"], version = "^3.1.9" }
-psycopg2-binary = "^2.9.6"
+psycopg = { extras = ["binary", "pool"], version = "^3.1.12" }
 python-jose = { extras = ["cryptography"], version = "^3.3.0" }
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }
+ipython = "^8.16.1"
+python-dotenv = "^1.0.0"
+pydantic-settings = "^2.0.3"
+python-multipart = "^0.0.6"
 
 
 [build-system]

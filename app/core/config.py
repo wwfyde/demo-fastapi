@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     PGUSER: str = os.getenv('PGUSER')
     PGPASS: str = os.getenv('PGPASS')
     # TODO set container ip
-    POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@postgres:5432/demo_fastapi"
+    POSTGRES_DSN: str | PostgresDsn = f"postgresql+psycopg://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@172.18.0.2:5432/demo_fastapi"
     # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     print(PGUSER)
