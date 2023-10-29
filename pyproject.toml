@@ -20,6 +20,7 @@ ipython = "^8.16.1"
 python-dotenv = "^1.0.0"
 pydantic-settings = "^2.0.3"
 python-multipart = "^0.0.6"
+redis = "^5.0.1"
 
 
 [build-system]
