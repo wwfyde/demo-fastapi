@@ -4,12 +4,11 @@ version = "0.1.0"
 description = "a demo fastapi project for tech experiment"
 authors = ["wwfyde <wwfyde@163.com>"]
 readme = "README.md"
-#packages = [{ include = "app" }]
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.104.0"
-uvicorn = "^0.23.2"
+fastapi = { extras = ["all"], version = "^0.109.2" }
 sqlalchemy = "^2.0.18"
 alembic = "^1.11.1"
 requests = "^2.31.0"
@@ -18,9 +17,9 @@ python-jose = { extras = ["cryptography"], version = "^3.3.0" }
 passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 ipython = "^8.16.1"
 python-dotenv = "^1.0.0"
-pydantic-settings = "^2.0.3"
-python-multipart = "^0.0.6"
+pydantic-settings = "^2.1.0"
 redis = "^5.0.1"
+mysql-connector-python = "^8.3.0"
 
 
 [build-system]
