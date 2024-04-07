@@ -1,19 +1,35 @@
-from typing import Annotated, Any
+import logging
+from contextlib import asynccontextmanager
+from enum import Enum
+from typing import Annotated, Literal
 
-from fastapi import FastAPI, Body
-from httpx import Request
+from fastapi import FastAPI, Body, Depends, UploadFile, File, Query
 from pydantic import JsonValue
+from redis.asyncio import Redis
+from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 from uvicorn import run
 
 from app import api2
-from app.core.config import settings
 from app.api.api_v1.api import api_router
-from app.db.session import engine, Base
+from app.core.config import settings
+from app.core.dependencies import get_redis_cache, get_db
+from app.models import Item
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("开机")
+    logging.info("startup")
+    yield
+    print('关机')
+    logging.info('shutdown')
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan
 )
 
 
@@ -49,9 +65,65 @@ async def body(
     return item
 
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
+# @app.get('/self')
+# async def self(request: Request):
+#     client = TestClient(app)
+#     response = client.get('/info')
+#     return response.json()
 
-Base.metadata.create_all(bind=engine)
+@app.get('/cache')
+async def cache_example(
+        cache: Redis = Depends(get_redis_cache)
+):
+    await cache.set('my-key', 'value-flag')
+    value = await cache.get('my-key')
+    return value
+
+
+@app.get('/pg_and_redis')
+async def pg_and_redis(
+        db: Session = Depends(get_db),
+        cache: Redis = Depends(get_redis_cache)
+):
+    obj = db.get(Item, 1)
+    return obj
+    await cache.set('my-key', 'value-flag')
+    value = await cache.get('my-key')
+    return value
+
+
+@app.post('/upload')
+async def upload(
+        file: Annotated[UploadFile, File(description='File')],
+):
+    return file.headers
+
+
+class Color(str, Enum):
+    red = "RED"
+    green = "GREEN"
+    blue = "BLUE"
+
+
+@app.get('/enum')
+async def enum_example(
+        color: Annotated[Color, Query()] = Color.red
+):
+    return {
+        'color': color.value
+    }
+
+
+@app.get('/literal')
+async def literal_example(
+        color: Literal['a', 'n', 'c'] = 'c'
+):
+    return {
+        'color': color
+    }
+
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 app.mount('/outer', api2.app)
 

@@ -2,26 +2,24 @@
 
 依赖项
 """
-from typing import Annotated
+from typing import Annotated, Generator
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from sqlalchemy.orm import Session
 from starlette import status
 
 from app import settings
-from app.db.session import SessionLocal
+from app.core.db import engine
 from app.schemas.token import TokenData
 from app.schemas.user import UserInDB, User
 
 
 # Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_db() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        yield session
 
 
 # verified from full-stack-fastapi-postgresql, it's right usage to get token_url

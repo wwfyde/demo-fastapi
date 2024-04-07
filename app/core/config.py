@@ -1,8 +1,5 @@
-import os
-import secrets
 from pathlib import Path
 
-from dotenv import load_dotenv
 from pydantic import DirectoryPath, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -32,14 +29,14 @@ class Settings(BaseSettings):
     PGUSER: str
     PGPASS: str
     # TODO set container ip
-    POSTGRES_DSN: str | PostgresDsn
+    POSTGRES_DSN: PostgresDsn | str
     # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@172.18.0.2:5432/demo_fastapi"
     # POSTGRES_DSN: str | PostgresDsn = f"postgresql://{PGUSER}:{PGPASS}@localhost:5432/demo_fastapi"
     log_file_path: str | DirectoryPath = BASE_DIR.joinpath("log")
 
     model_config = SettingsConfigDict(
         # `.env.prod` takes priority over `.env`
-        env_file=('.env', '.env.local', '.env.prod', '.env.prod.local')
+        env_file=('.env', '.env.local', '.env.staging', '.env.prod')
     )
 
 
