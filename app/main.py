@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from enum import Enum
@@ -7,7 +8,7 @@ from fastapi import FastAPI, Body, Depends, UploadFile, File, Query
 from pydantic import JsonValue
 from redis.asyncio import Redis
 from sqlalchemy.orm import Session
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, StreamingResponse
 from uvicorn import run
 
 from app import api2
@@ -42,8 +43,10 @@ async def root():
 async def info():
     return {
         "project_name": settings.PROJECT_NAME,
-        "demo": settings.PGUSER,
-        "app_name": settings.app_name
+        "app_name": settings.app_name,
+        "settings": settings.nested.book.name,
+        "demo": settings.nested.demo,
+        "settings_all": settings,
     }
 
 
@@ -121,6 +124,17 @@ async def literal_example(
     return {
         'color': color
     }
+
+
+async def get_content():
+    for i in range(100):
+        yield str(i)
+        await asyncio.sleep(0.1)
+
+
+@app.get('/stream')
+async def stream_example():
+    return StreamingResponse(get_content(), media_type="text/event-stream")
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
