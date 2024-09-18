@@ -3,17 +3,20 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
 from requests import Session
 from starlette import status
 
-from app import log, schemas, crud, settings
-from app.api.deps import oauth2_scheme, get_current_active_user, fake_users_db, fake_hash_password, get_db, get_user
+from app import schemas, crud, settings
+from app.api.deps import oauth2_scheme, get_current_active_user, fake_users_db, get_db, get_user
+from app.core.dependencies import get_logger
 from app.schemas.token import Token
-from app.schemas.user import User, UserInDB
+from app.schemas.user import User
 
 router = APIRouter()
+
+log = get_logger(name="user")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -43,7 +46,7 @@ def create_access_token(data: dict, expire_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
 
@@ -76,7 +79,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(
         data={"sub": user.username}, expire_delta=access_token_expires
     )

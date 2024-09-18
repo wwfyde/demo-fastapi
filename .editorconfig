@@ -1,0 +1,6 @@
+root = true
+
+
+[*.{ini,cfg}]
+ij_any_line_comment_at_first_column = true
+insert_final_newline = true

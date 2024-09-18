@@ -35,3 +35,4 @@ ipython_config.py
 
 *.lock
 *.local
+*.local.yml
