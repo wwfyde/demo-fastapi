@@ -15,7 +15,7 @@ class ItemBase(BaseModel, from_attributes=True):
 
 class ItemModel(BaseModel, from_attributes=True):
     """
-    ORM parse of Item, or naming with ItemSchema, ItemValidator
+    ORM parse of Item, or naming with **ItemSchema**, **ItemValidator**
     """
     id: int
     title: str
@@ -23,6 +23,15 @@ class ItemModel(BaseModel, from_attributes=True):
     description2: str
     config: JsonValue
     owner_id: int
+
+
+class ItemInDB(ItemBase):
+    """
+    对象在数据库中的表示, 通常包含敏感数据, 不应该将密码登数据暴露给用户
+    """
+    id: int
+    owner_id: int
+    pass
 
 
 class Item(ItemBase):
@@ -59,15 +68,6 @@ class ItemUpdate(ItemBase):
     Go 中 Update<ModelName>Input
     """
     id: int
-    pass
-
-
-class ItemInDB(ItemBase):
-    """
-    数据库中
-    """
-    id: int
-    owner_id: int
     pass
 
 

@@ -27,7 +27,7 @@ class Redis(BaseModel):
     password: str | None = ''
 
 
-class MySQL(BaseModel):
+class MySQLSettings(BaseModel):
     host: str
     port: int
     username: str
@@ -78,7 +78,7 @@ class Settings(BaseSettings):
 
     # postgres
     postgres: Postgres
-    mysql: MySQL
+    mysql: MySQLSettings
     rabbitmq: RabbitMQ
 
     # TODO set container ip

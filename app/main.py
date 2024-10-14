@@ -5,8 +5,7 @@ from contextlib import asynccontextmanager
 from enum import Enum
 from typing import Annotated, Literal
 
-import logfire
-from fastapi import FastAPI, Body, Depends, UploadFile, File, Query
+from fastapi import Body, Depends, FastAPI, File, Query, UploadFile
 from pydantic import JsonValue
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -14,9 +13,10 @@ from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse, StreamingResponse
 from uvicorn import run
 
-from app.api.api_v1.api import api_router
+from app.api.v1.api import api_router
+from app.apps import features, pd_validate_serialize
 from app.core.config import settings
-from app.core.dependencies import get_redis_cache, get_db, get_logger
+from app.core.dependencies import get_db, get_logger, get_redis_cache
 from app.models import Item, LLM
 from app.schemas.item import ItemCreate
 
@@ -33,21 +33,40 @@ async def lifespan(app: FastAPI):
     logging.info('shutdown')
 
 
-app = FastAPI(
-    title=settings.project_name,
-    openapi_url=f"{settings.api_v1_str}/openapi.json",
-    lifespan=lifespan,
-    openapi_tags=[]
-)
-logfire.configure()
-logfire.instrument_fastapi(app)
-logfire.info(f'{app.__doc__}')
+def create_app(lifespan: callable = lifespan):
+    """
+    通过工厂函数创建app
+    :return:
+    """
+    app = FastAPI(
+        title=settings.project_name,
+        openapi_url=f"{settings.api_v1_str}/openapi.json",
+        lifespan=lifespan,
+        openapi_tags=[]
+
+    )
+    app.mount('/features', features.app)
+    app.include_router((pd_validate_serialize.router), prefix='/pd_validate_serialize')
+    return app
+
+
+app = create_app()
+
+
+# logfire.configure()
+# logfire.instrument_fastapi(app)
+# logfire.info(f'{app.__doc__}')
 
 
 # next, instrument your database connector, http library etc. and add the logging handler
 @app.get("/")
 async def root():
     return RedirectResponse(url="/docs")
+
+
+@app.get("/features", summary="重定向标识")
+async def features():
+    return RedirectResponse(url="/features/docs")
 
 
 @app.post("/file/")
