@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from enum import Enum
 from typing import Annotated, Literal
 
-from fastapi import Body, Depends, FastAPI, File, Query, UploadFile
+from fastapi import Body, Depends, FastAPI, File, Query, Request, UploadFile
 from pydantic import JsonValue
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -51,6 +51,16 @@ def create_app(lifespan: callable = lifespan):
 
 
 app = create_app()
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    # log.debug(f"Process time: {process_time * 1000}ms")
+    return response
 
 
 # logfire.configure()

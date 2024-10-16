@@ -1,11 +1,12 @@
 import asyncio
 import logging
+from logging.handlers import RotatingFileHandler
+from typing import AsyncGenerator, Generator
+
 import redis as redis_sync
 import redis.asyncio as redis
 from celery import Celery
-from logging.handlers import RotatingFileHandler
 from sqlalchemy.orm import Session
-from typing import Generator, AsyncGenerator
 
 from app import settings
 from app.core.db import engine
@@ -13,14 +14,30 @@ from app.core.db import engine
 
 # redis cache
 async def get_redis_cache() -> Generator[redis.Redis, None, None]:
-    pool = redis.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3)
-    async with redis.Redis(connection_pool=pool, decode_responses=True, protocol=3) as r:
+    """
+    https://redis.readthedocs.io/en/stable/examples/asyncio_examples.html
+
+    :return:
+    """
+    pool = redis.ConnectionPool.from_url(settings.redis_dsn,
+                                         decode_responses=True,
+                                         protocol=3,
+                                         health_check_interval=2,
+                                         retry_on_timeout=True,
+                                         max_connections=10,
+                                         )
+    async with redis.Redis.from_pool(pool) as r:
+        # async with redis.Redis(connection_pool=pool) as r:  # deprecated
         yield r
 
 
 def get_redis_cache_sync() -> Generator[redis_sync.Redis, None, None]:
-    pool = redis_sync.ConnectionPool(decode_responses=True, protocol=3)
-    with redis_sync.Redis(connection_pool=pool, host='redis', port=6379, db=0, decode_responses=True, protocol=3) as r:
+    """
+    :return:
+    """
+    pool = redis_sync.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3,
+                                              health_check_interval=2)
+    with redis_sync.Redis(connection_pool=pool) as r:
         yield r
 
 

@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Type, Tuple
+from typing import Tuple, Type
 
-from pydantic import DirectoryPath, BaseModel, computed_field
-from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource, YamlConfigSettingsSource
+from pydantic import BaseModel, DirectoryPath, computed_field
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
 
 base_dir: Path = Path(__file__).resolve().parent.parent
 project_dir: Path = base_dir.parent
@@ -117,7 +117,7 @@ class Settings(BaseSettings):
 
     @computed_field
     def redis_dsn(self) -> str:
-        return f"redis://:{self.redis.password or ''}@{self.redis.host}:{self.redis.port}/{self.redis.database}"
+        return f"redis://:{self.redis.password or ''}@{self.redis.host}:{self.redis.port}/{self.redis.database}?health_check_interval=2"
 
     @computed_field
     def postgres_dsn(self) -> str:
