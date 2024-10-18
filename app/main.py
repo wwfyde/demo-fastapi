@@ -6,11 +6,12 @@ from enum import Enum
 from typing import Annotated, Literal
 
 from fastapi import Body, Depends, FastAPI, File, Query, Request, UploadFile
+from fastapi.exceptions import RequestValidationError
 from pydantic import JsonValue
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from starlette.responses import RedirectResponse, StreamingResponse
+from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 from uvicorn import run
 
 from app.api.v1.api import api_router
@@ -29,8 +30,8 @@ async def lifespan(app: FastAPI):
     logging.info("startup")
 
     yield
-    print('关机')
-    logging.info('shutdown')
+    print("关机")
+    logging.info("shutdown")
 
 
 def create_app(lifespan: callable = lifespan):
@@ -42,11 +43,10 @@ def create_app(lifespan: callable = lifespan):
         title=settings.project_name,
         openapi_url=f"{settings.api_v1_str}/openapi.json",
         lifespan=lifespan,
-        openapi_tags=[]
-
+        openapi_tags=[],
     )
-    app.mount('/features', features.app)
-    app.include_router((pd_validate_serialize.router), prefix='/pd_validate_serialize')
+    app.mount("/features", features.app)
+    app.include_router((pd_validate_serialize.router), prefix="/pd_validate_serialize")
     return app
 
 
@@ -63,6 +63,15 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
+# register exception_handler
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(_, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=400,
+        content={"code": 400, "message": f"request params error: {exc.body}"},
+    )
+
+
 # logfire.configure()
 # logfire.instrument_fastapi(app)
 # logfire.info(f'{app.__doc__}')
@@ -75,7 +84,7 @@ async def root():
 
 
 @app.get("/features", summary="重定向标识")
-async def features():
+async def features_redirect():
     return RedirectResponse(url="/features/docs")
 
 
@@ -107,8 +116,8 @@ async def info():
 
 @app.post("/body")
 async def body(
-        item: Annotated[JsonValue, Body()],
-        # item: Request,
+    item: Annotated[JsonValue, Body()],
+    # item: Request,
 ):
     """
     允许传入任意类型的字符串
@@ -129,32 +138,28 @@ async def body(
 #     response = client.get('/info')
 #     return response.json()
 
-@app.get('/cache')
-async def cache_example(
-        cache: Redis = Depends(get_redis_cache)
-):
-    await cache.set('my-key', 'value-flag')
-    value = await cache.get('my-key')
+
+@app.get("/cache")
+async def cache_example(cache: Redis = Depends(get_redis_cache)):
+    await cache.set("my-key", "value-flag")
+    value = await cache.get("my-key")
     return value
 
 
-@app.get('/pg_and_redis')
-async def pg_and_redis(
-        db: Session = Depends(get_db),
-        cache: Redis = Depends(get_redis_cache)
-):
+@app.get("/pg_and_redis")
+async def pg_and_redis(db: Session = Depends(get_db), cache: Redis = Depends(get_redis_cache)):
     obj = db.get(Item, 1)
     print(obj)
     stmt = select(Item).where(Item.id == 1)  # noqa
     db.execute(stmt)
-    await cache.set('my-key', 'value-flag')
-    value = await cache.get('my-key')
+    await cache.set("my-key", "value-flag")
+    value = await cache.get("my-key")
     return value
 
 
-@app.post('/upload')
+@app.post("/upload")
 async def upload(
-        file: Annotated[UploadFile, File(description='File')],
+    file: Annotated[UploadFile, File(description="File")],
 ):
     return file.headers
 
@@ -165,22 +170,14 @@ class Color(str, Enum):
     blue = "BLUE"
 
 
-@app.get('/enum')
-async def enum_example(
-        color: Annotated[Color, Query()] = Color.red
-):
-    return {
-        'color': color.value
-    }
+@app.get("/enum")
+async def enum_example(color: Annotated[Color, Query()] = Color.red):
+    return {"color": color.value}
 
 
-@app.get('/literal')
-async def literal_example(
-        color: Literal['a', 'n', 'c'] = 'c'
-):
-    return {
-        'color': color
-    }
+@app.get("/literal")
+async def literal_example(color: Literal["a", "n", "c"] = "c"):
+    return {"color": color}
 
 
 async def get_content():
@@ -189,7 +186,7 @@ async def get_content():
         await asyncio.sleep(0.1)
 
 
-@app.get('/stream')
+@app.get("/stream")
 async def stream_example():
     return StreamingResponse(get_content(), media_type="text/event-stream")
 
@@ -202,17 +199,15 @@ def event_stream():
         yield f"data: Event {count}\n\n"
 
 
-@app.get('/events')
+@app.get("/events")
 async def events():
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
-@app.post('/llm')
-async def llm(
-        db: Session = Depends(get_db)
-):
+@app.post("/llm")
+async def llm(db: Session = Depends(get_db)):
     llm_db = LLM(
-        name='test2',
+        name="test2",
         # config=None
     )
     db.add(llm_db)
@@ -221,10 +216,10 @@ async def llm(
     return llm_db
 
 
-@app.post('/items')
+@app.post("/items")
 async def create_item(
-        item: ItemCreate,
-        db: Session = Depends(get_db),
+    item: ItemCreate,
+    db: Session = Depends(get_db),
 ):
     item_db = Item()
     log.info(str(item))
@@ -233,30 +228,31 @@ async def create_item(
 
     db.add(item_db)
     db.commit()
-    log.info(f'config type: {str(item.config)}, {item_db.config}')
-    log.info(f'config type: {type(item.config)}, {type(item_db.config)}')
+    log.info(f"config type: {str(item.config)}, {item_db.config}")
+    log.info(f"config type: {type(item.config)}, {type(item_db.config)}")
     db.refresh(item_db)
     return item_db
 
 
-@app.post('/items/v2')
+@app.post("/items/v2")
 async def create_item(
-        item: ItemCreate,
-        db: Session = Depends(get_db),
+    item: ItemCreate,
+    db: Session = Depends(get_db),
 ):
     # 字段过滤
     print("表格字段:", Item.__table__.columns)
-    new_item = {key: value for key, value in item.model_dump(exclude_unset=True).items() if
-                key in Item.__table__.columns}
+    new_item = {
+        key: value for key, value in item.model_dump(exclude_unset=True).items() if key in Item.__table__.columns
+    }
     print("过滤后的字段", new_item)
-    item_db = Item(**new_item, description2='test')
+    item_db = Item(**new_item, description2="test")
     # item_db = Item(**item.model_dump(exclude_unset=True), description2='test')
-    print('项目', item_db)
-    print('项目', item.model_dump(exclude_unset=True))
+    print("项目", item_db)
+    print("项目", item.model_dump(exclude_unset=True))
     db.add(item_db)
     db.commit()
-    log.info(f'config type: {str(item.config)}, {item_db.config}')
-    log.info(f'config type: {type(item.config)}, {type(item_db.config)}')
+    log.info(f"config type: {str(item.config)}, {item_db.config}")
+    log.info(f"config type: {type(item.config)}, {type(item_db.config)}")
     db.refresh(item_db)
     return item_db
 
@@ -266,4 +262,4 @@ app.include_router(api_router, prefix=settings.api_v1_str)
 # app.mount('/outer', api2.app)
 
 if __name__ == "__main__":
-    run(app='main:app', reload=True, port=8199, workers=4)
+    run(app="main:app", reload=True, port=8199, workers=4)
