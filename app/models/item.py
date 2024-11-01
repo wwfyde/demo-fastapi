@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, JSON
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy import Column, ForeignKey, Integer, JSON, String
+from sqlalchemy.orm import Mapped, relationship
 
 from .models import Base
 
@@ -16,3 +16,6 @@ class Item(Base):
     # name_alias = mapped_column(String(64), name='alias')
 
     owner = relationship("User", back_populates="items")
+
+    def __repr__(self):
+        return f"<Item id={self.id} title={self.title}, {self.description=}>"

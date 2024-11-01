@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from requests import Session
 
-from app import schemas, crud
 from app.api.deps import get_db
 from app.crud import crud_item
 from app.schemas import item
@@ -12,6 +11,7 @@ router = APIRouter()
 @router.get("/items/", response_model=list[item.Item])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud_item.get_items(db, skip=skip, limit=limit)
+    print(items)
     return items
 
 

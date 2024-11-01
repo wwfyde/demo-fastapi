@@ -147,7 +147,9 @@ async def cache_example(cache: Redis = Depends(get_redis_cache)):
 
 
 @app.get("/pg_and_redis")
-async def pg_and_redis(db: Session = Depends(get_db), cache: Redis = Depends(get_redis_cache)):
+async def pg_and_redis(
+    db: Session = Depends(get_db), cache: Redis = Depends(get_redis_cache)
+):
     obj = db.get(Item, 1)
     print(obj)
     stmt = select(Item).where(Item.id == 1)  # noqa
@@ -242,7 +244,9 @@ async def create_item(
     # 字段过滤
     print("表格字段:", Item.__table__.columns)
     new_item = {
-        key: value for key, value in item.model_dump(exclude_unset=True).items() if key in Item.__table__.columns
+        key: value
+        for key, value in item.model_dump(exclude_unset=True).items()
+        if key in Item.__table__.columns
     }
     print("过滤后的字段", new_item)
     item_db = Item(**new_item, description2="test")
@@ -258,6 +262,7 @@ async def create_item(
 
 
 app.include_router(api_router, prefix=settings.api_v1_str)
+app.include_router(features.router, prefix="/features", tags=["features", "default"])
 
 # app.mount('/outer', api2.app)
 

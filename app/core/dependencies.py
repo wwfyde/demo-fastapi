@@ -16,30 +16,34 @@ from app.core.decorators import time_decorator
 
 
 # redis cache
-async def get_redis_cache() -> Generator[redis.Redis, None, None]:
+async def get_redis_cache() -> AsyncGenerator[redis.Redis, None]:
     """
     https://redis.readthedocs.io/en/stable/examples/asyncio_examples.html
 
     :return:
     """
-    pool = redis.ConnectionPool.from_url(settings.redis_dsn,
-                                         decode_responses=True,
-                                         protocol=3,
-                                         health_check_interval=2,
-                                         retry_on_timeout=True,
-                                         max_connections=10,
-                                         )
+    pool = redis.ConnectionPool.from_url(
+        settings.redis_dsn,
+        decode_responses=True,
+        protocol=3,
+        health_check_interval=2,
+        retry_on_timeout=True,
+        max_connections=10,
+    )
     async with redis.Redis.from_pool(pool) as r:
         # async with redis.Redis(connection_pool=pool) as r:  # deprecated
         yield r
+        print("Redis 客户端关闭")
+        await r.aclose()
 
 
 def get_redis_cache_sync() -> Generator[redis_sync.Redis, None, None]:
     """
     :return:
     """
-    pool = redis_sync.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3,
-                                              health_check_interval=2)
+    pool = redis_sync.ConnectionPool.from_url(
+        settings.redis_dsn, decode_responses=True, protocol=3, health_check_interval=2
+    )
     with redis_sync.Redis(connection_pool=pool) as r:
         yield r
 
@@ -54,7 +58,9 @@ DBSession = Annotated[Session, Depends(get_db)]
 
 
 async def get_async_redis_cache() -> AsyncGenerator[redis.Redis, None]:
-    pool = redis.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3)
+    pool = redis.ConnectionPool.from_url(
+        settings.redis_dsn, decode_responses=True, protocol=3
+    )
     r = redis.Redis(connection_pool=pool, decode_responses=True, protocol=3)
     async with r:
         print(await r.get("a"))
@@ -62,7 +68,9 @@ async def get_async_redis_cache() -> AsyncGenerator[redis.Redis, None]:
 
 
 async def get_async_redis_cache2() -> AsyncGenerator[redis.Redis, None]:
-    pool = redis.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3)
+    pool = redis.ConnectionPool.from_url(
+        settings.redis_dsn, decode_responses=True, protocol=3
+    )
     r = redis.Redis(connection_pool=pool, decode_responses=True, protocol=3)
     try:
         yield r
@@ -73,7 +81,9 @@ async def get_async_redis_cache2() -> AsyncGenerator[redis.Redis, None]:
 def get_logger(name: str = __name__, write_to_file: bool = False) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)  # 设置日志级别
-    formatter = logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s [in %(pathname)s:%(lineno)d]")
+    formatter = logging.Formatter(
+        "%(asctime)s | %(name)s | %(levelname)s | %(message)s [in %(pathname)s:%(lineno)d]"
+    )
 
     if write_to_file is True:
         log_file = settings.log_file_path.joinpath(f"{name}.log")
@@ -131,7 +141,7 @@ class RateLimiter:
 
 
 # celery
-celery = Celery('tasks', broker='amqp://guest@rabbit//', backend='redis://redis:6379/0')
+celery = Celery("tasks", broker="amqp://guest@rabbit//", backend="redis://redis:6379/0")
 
 
 async def main():
@@ -139,5 +149,5 @@ async def main():
         print(await r.get("a"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

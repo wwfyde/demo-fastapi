@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,9 +8,15 @@ from passlib.context import CryptContext
 from requests import Session
 from starlette import status
 
-from app import schemas, crud, settings
-from app.api.deps import oauth2_scheme, get_current_active_user, fake_users_db, get_db, get_user
-from app.core.dependencies import get_logger
+from app import crud, schemas, settings
+from app.api.deps import (
+    fake_users_db,
+    get_current_active_user,
+    get_db,
+    get_user,
+    oauth2_scheme,
+)
+from app.core.deps import get_logger
 from app.schemas.token import Token
 from app.schemas.user import User
 
@@ -46,7 +52,9 @@ def create_access_token(data: dict, expire_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.secret_key, algorithm=settings.jwt_algorithm
+    )
     return encoded_jwt
 
 
@@ -62,13 +70,15 @@ async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 @router.get("/users/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]):
+async def read_users_me(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
     return current_user
 
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     # 用户认证
     log.info(f"{fake_users_db}, {form_data.username}, {form_data.password}")
