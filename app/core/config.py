@@ -2,13 +2,19 @@ from pathlib import Path
 from typing import Tuple, Type
 
 from pydantic import BaseModel, DirectoryPath, computed_field
-from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, YamlConfigSettingsSource
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 
 base_dir: Path = Path(__file__).resolve().parent.parent
 project_dir: Path = base_dir.parent
 
 
 # load_dotenv(dotenv_path=PROJECT_DIR.joinpath('.env'))
+
 
 class Nest2(BaseModel):
     name: str
@@ -24,7 +30,7 @@ class Redis(BaseModel):
     host: str
     port: int
     database: int | None = 0
-    password: str | None = ''
+    password: str | None = ""
 
 
 class MySQLSettings(BaseModel):
@@ -58,7 +64,6 @@ class RabbitMQ(BaseModel):
 
 
 class Settings(BaseSettings):
-
     @classmethod
     def load_env(cls):
         pass
@@ -71,7 +76,7 @@ class Settings(BaseSettings):
     secret_key: str = "7212718542579599fe8923e3bf1632862d13f636def7d0cdd60a1765a10553d5"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-    project_name: str = 'demo-fastapi'
+    project_name: str = "demo-fastapi"
     base_dir: str | DirectoryPath = base_dir
     project_dir: str | DirectoryPath = base_dir.parent
     redis: Redis
@@ -89,8 +94,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         # `.env.prod` takes priority over `.env`
-        extra='ignore',
-        env_file=('.env', '.env.staging', '.env.prod', '.env.local'),
+        extra="ignore",
+        env_file=(".env", ".env.staging", ".env.prod", ".env.local"),
         yaml_file=[
             "config.yml",
             "config.dev.yml",
@@ -98,22 +103,27 @@ class Settings(BaseSettings):
             "config.prod.yml",
             "config.local.yml",
             "config.dev.local.yml",
+            "config.staging.local.yml",
+            "config.prod.local.yml",
         ],
         yaml_file_encoding="utf-8",
         env_file_encoding="utf-8",
-
     )
 
     @classmethod
     def settings_customise_sources(
-            cls,
-            settings_cls: Type[BaseSettings],
-            init_settings: PydanticBaseSettingsSource,
-            env_settings: PydanticBaseSettingsSource,
-            dotenv_settings: PydanticBaseSettingsSource,
-            file_secret_settings: PydanticBaseSettingsSource,
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
-        return YamlConfigSettingsSource(settings_cls), dotenv_settings, env_settings,
+        return (
+            YamlConfigSettingsSource(settings_cls),
+            dotenv_settings,
+            env_settings,
+        )
 
     @computed_field
     def redis_dsn(self) -> str:
@@ -135,7 +145,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(settings.demo)
     print(settings.mysql_dsn)
     print(settings.redis_dsn)
