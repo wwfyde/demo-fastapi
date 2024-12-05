@@ -1,30 +1,55 @@
-### System and Project
-.idea/
-.fleet/
-.vscode/
+### Systems MacOS
 .DS_Store
-
-*.log
-*.log*
+/Icon?
 
 
-/temp
-out
+### Projects
+temp/
+data/
+.idea/
+.vscode/
+.fleet/
+*.drawio.bkp
+.obsidian/
+
+
+### Go
+# Go workspace file
+go.work
+vendor/
+bin/
+# match any directory equal **/out/
+out/
+
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-
-# Environments
-#.env
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-
+### Python
 # Python
-__pychache__
-*.pyc
+__pycache__/
+*.py[cod]
+*.egg-info
+
+.venv/
+venv/
+
+### Build and Distribution
+build/
+dist/
+wheels/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -33,6 +58,36 @@ __pychache__
 profile_default/
 ipython_config.py
 
-*.lock
+
+
+### JavaScripts
+node_modules/
+package-lock.json
+yarn.lock
+
+### Rust
+target/
+
+### zip rar tar.gz
+*.zip
+*.rar
+*.tar.gz
+*.tar.xz
+*.tgz
+*.txz
+
+### Configuration
+# env file and config
+.env
+.env.dev
+.env.staging
+.env.development
+.env.prod
+.env.production
 *.local
+*.local.toml
 *.local.yml
+config.yml
+config.dev.yml
+config.prod.yml
+config.staging.yml

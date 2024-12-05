@@ -47,7 +47,7 @@ class Item(ItemBase):
 
 class ItemCreate(ItemBase):
     """
-    创建时
+    创建时 ItemSchema, ItemValidater, CreateItemValidator
     """
     alias: str | None = None
     pass
@@ -73,7 +73,7 @@ class ItemUpdate(ItemBase):
 
 class ItemOut(ItemBase):
     """
-    输出时 ItemOut ItemRead,
+    输出时 ItemOut, `ItemResponse`, `ItemResult`, ~~ItemRead~~
     """
     id: int
     pass

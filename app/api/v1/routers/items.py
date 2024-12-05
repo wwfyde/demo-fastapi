@@ -19,4 +19,7 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def create_item_for_user(
         user_id: int, item: item.ItemCreate, db: Session = Depends(get_db)
 ):
+    """
+    对应: data, params, json, payload, form, files, body, query, headers, cookies, path
+    """
     return crud_item.create_user_item(db=db, item=item, user_id=user_id)
