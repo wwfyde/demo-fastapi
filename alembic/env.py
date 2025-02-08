@@ -3,10 +3,10 @@ from pathlib import Path
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, MetaData
+from sqlalchemy import MetaData, engine_from_config
 from sqlalchemy import pool
 
-from app import models, settings
+from src import models, settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,7 +31,7 @@ target_metadata: list | MetaData = [models.Base.metadata]
 
 # if you use environment variables from alembic.ini use this to set sqlalchemy.url = %(MYSQL_DSN)s
 # but the better way is get url from settings config
-env_files = ['.env', '.env.local', '.env.prod']
+env_files = [".env", ".env.local", ".env.prod"]
 for env_file in env_files:
     env_file = Path(__file__).resolve().parent.parent.joinpath(env_file)
     print(env_file)
@@ -104,7 +104,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            include_name=include_name
+            include_name=include_name,
         )
 
         with context.begin_transaction():

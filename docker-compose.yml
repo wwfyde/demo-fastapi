@@ -1,12 +1,18 @@
 services:
-    fastapi:
-        build: .
-        command: [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000" ]
-        ports:
-            - "8000:8000"
-        depends_on:
-            - scheduler
+  fastapi:
+    build: .
+    #    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", ""  ]
+    network_mode: host
+    ports:
+      - "8000:8000"
+#    networks:
+#      - default
+#    depends_on:
+#      - scheduler
 
-    scheduler:
-        build: .
-        command: [ "python", "app/scheduler.py" ]
+#  scheduler:
+#    build: .
+#    command: [ "python", "src/scheduler.py" ]
+networks:
+  default:
+    driver: host
