@@ -1,4 +1,8 @@
-from src.core.config import settings
+import demo_fastapi
+import package2
 
-if __name__ == "__main__":
-    print(settings.log_file_path.joinpath("outer.log"))
+print(demo_fastapi.__file__)
+
+print(package2.__file__)
+
+print(package2.hello())

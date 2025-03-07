@@ -3,8 +3,8 @@ import time
 from sqlalchemy import bindparam, text, update
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.core.db import async_engine
-from src.models import Item
+from demo_fastapi.core.db import async_engine
+from demo_fastapi.models import Item
 
 
 async def main():

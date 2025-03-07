@@ -1,0 +1,20 @@
+[project]
+name = "surreal-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.7",
+    "surrealdb>=1.0.3",
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+]
+
+[project.scripts]
+hello = "hello:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
