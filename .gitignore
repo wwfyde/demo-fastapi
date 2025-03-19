@@ -91,3 +91,9 @@ config.yml
 config.dev.yml
 config.prod.yml
 config.staging.yml
+
+# Logs
+logs
+*.log
+*.log-*
+*.log_*

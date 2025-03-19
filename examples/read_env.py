@@ -7,7 +7,7 @@ if __name__ == "__main__":
     # requests.get(url="https://www.google.com")
     # print(__package__)
     # print(sys.path)
-    # # Not Recommended use finde_dotenv instead
+    # # Not Recommended use find_dotenv instead
     # env_path = Path('.').absolute().parent.joinpath('.env')
     # load_dotenv(env_path)
     # with open(env_path) as f:

@@ -1,7 +1,12 @@
 services:
   fastapi:
-    build: .
-    #    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", ""  ]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - http_proxy=http://172.21.210.219:7890
+        - https_proxy=http://172.21.210.219:7890
+    # command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", ""  ]
     network_mode: host
     ports:
       - "8000:8000"

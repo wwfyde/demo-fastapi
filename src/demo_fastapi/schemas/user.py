@@ -1,16 +1,14 @@
 from pydantic import BaseModel, ConfigDict, SecretStr
 
-from demo_fastapi.schemas import item
-
 
 class UserModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     username: str
     email: str | None = None
     full_name: str | None = None
-    disabled: bool | None = None
+    is_disabled: bool | None = None
     hashed_password: SecretStr | None = None
-    items: list[item.Item] = []
+    # items: list[item.Item] = []
     is_active: bool | None = None
     id: int | None = None
 

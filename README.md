@@ -15,3 +15,11 @@ a tech experiment for FastAPI
 [//]: # ( TODO )
 
 <!-- TODO 你好  -->
+
+## Features
+
+- use `pytest` and `pytest-asyncio` for testing;
+- add many-to-many relationship examples;
+- use `SQLAlchemy` for ORM;
+- use `pydantic-settings` for the-12-factor-app configuration;
+

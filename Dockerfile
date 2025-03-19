@@ -1,5 +1,9 @@
 FROM python:3.12-slim AS builder
 
+## 这种方式也不错
+# COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Install uv package manager
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
@@ -10,17 +14,22 @@ ENV TZ="Asia/Shanghai"
 
 WORKDIR /app
 
-COPY . .
+# Copy project files
+COPY pyproject.toml .
+COPY src/ src/
+COPY packages/ packages/
+COPY .env .
+COPY config.yml .
+COPY README.md .
+COPY config.local.yml .
+COPY uv.lock .
 
-RUN uv sync
+# Install dependencies
+RUN uv sync --frozen  --no-dev
 
-#RUN <<EOF
-#apt-get update
-#apt-get install -y --no-install-recommends git
-#EOF
+ENV PATH="/app/.venv/bin:$PATH"
 
-
-
-CMD ["uv","run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use the correct module path for the application
+CMD ["uv", "run", "uvicorn", "demo_fastapi.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 EXPOSE 8000

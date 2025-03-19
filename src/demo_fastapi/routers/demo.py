@@ -12,7 +12,7 @@ from starlette.responses import RedirectResponse, StreamingResponse
 
 from demo_fastapi.core.config import settings
 from demo_fastapi.core.deps import get_db, get_redis_cache
-from demo_fastapi.models import LLM, Item
+from demo_fastapi.models import Item, LLM
 from demo_fastapi.schemas.item import ItemCreate
 
 router = APIRouter()
@@ -137,7 +137,7 @@ async def stream_example():
 
 def event_stream():
     count = 0
-    while True:
+    while count < 10:
         time.sleep(1)  # Simulate a delay for sending events
         count += 1
         yield f"data: Event {count}\n\n"
