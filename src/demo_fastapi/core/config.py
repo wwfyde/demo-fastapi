@@ -71,6 +71,15 @@ class ItemConfig(BaseModel):
     )
 
 
+class AliyunOssConfig(BaseModel):
+    endpoint: str
+    access_key: str
+    access_secret: str
+    bucket_name: str
+    domain: str | None = None
+    ...
+
+
 class Model(BaseModel):
     a: str
     model_config = ConfigDict(coerce_numbers_to_str=True)
@@ -108,6 +117,9 @@ class Settings(BaseSettings):
     first_superuser_username: str = Field(default="admin")
     first_superuser_password: str = Field(default=...)
 
+    # 阿里云OSS
+    aliyun_oss: AliyunOssConfig = None
+
     # postgres
     postgres: PostgresConfig = None
     # mysql: MySQLSettings
@@ -121,7 +133,16 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # `.env.prod` takes priority over `.env`
         extra="ignore",
-        env_file=(".env", ".env.staging", ".env.prod", ".env.local"),
+        env_file=(
+            ".env",
+            ".env.dev",
+            ".env.staging",
+            ".env.prod",
+            ".env.local",
+            ".env.dev.local",
+            ".env.staging.local",
+            ".env.prod.local",
+        ),
         yaml_file=[
             "config.yml",
             "config.dev.yml",
@@ -145,6 +166,8 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        # The order of the returned callables decides the priority of inputs; first item is the highest priority.
+        # 第一个优先级最高
         return (
             env_settings,
             dotenv_settings,

@@ -15,23 +15,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session
 from starlette import status
 
+from demo_fastapi.core.cache import pool, pool_sync
 from demo_fastapi.core.config import settings
 from demo_fastapi.core.db import async_engine, engine
 from demo_fastapi.core.decorators import time_decorator
-
-# 使其为全局变量
-pool = redis.ConnectionPool.from_url(
-    settings.redis_dsn,
-    decode_responses=True,
-    protocol=3,
-    health_check_interval=2,
-    retry_on_timeout=True,
-    max_connections=10,
-)
-# 同步池
-pool_sync = redis_sync.Redis(
-    settings.redis_dsn, decode_responses=True, protocol=3, health_check_interval=2
-)
 
 
 # redis cache
@@ -45,8 +32,8 @@ async def get_redis_cache() -> AsyncGenerator[redis.Redis, None]:
     async with redis.Redis.from_pool(pool) as r:
         # async with redis.Redis(connection_pool=pool) as r:  # deprecated
         yield r
-        print("Redis 客户端关闭")
-        await r.aclose()
+        # print("Redis 客户端关闭")
+        # await r.aclose()
 
 
 def get_redis_cache_sync() -> Generator[redis_sync.Redis, None, None]:
