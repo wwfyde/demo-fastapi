@@ -7,7 +7,7 @@ https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html#combining-associa
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .models import Base
+from .base import Base
 
 
 class BookAuthor(Base):
@@ -23,21 +23,13 @@ class Book(Base):
     __tablename__ = "book"
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
-    author_associations = relationship(
-        "BookAuthor", back_populates="book", lazy="selectin"
-    )
-    authors = relationship(
-        "Author", secondary="book_author", viewonly=True, lazy="selectin"
-    )
+    author_associations = relationship("BookAuthor", back_populates="book", lazy="selectin")
+    authors = relationship("Author", secondary="book_author", viewonly=True, lazy="selectin")
 
 
 class Author(Base):
     __tablename__ = "author"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    book_associations = relationship(
-        "BookAuthor", back_populates="author", lazy="selectin"
-    )
-    books = relationship(
-        "Book", secondary="book_author", viewonly=True, lazy="selectin"
-    )
+    book_associations = relationship("BookAuthor", back_populates="author", lazy="selectin")
+    books = relationship("Book", secondary="book_author", viewonly=True, lazy="selectin")

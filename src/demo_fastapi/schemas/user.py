@@ -21,3 +21,9 @@ class UserCreate(UserBase):
     password: str
     username: str | None = None
     is_superuser: bool
+
+
+class UserUpsert(UserBase):
+    password: str | None = None
+    username: str | None = None
+    is_superuser: bool | None = None

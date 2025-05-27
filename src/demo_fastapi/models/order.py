@@ -1,10 +1,12 @@
+from pydantic.dataclasses import dataclass
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from .models import Base
+from .base import Base
 
 
+@dataclass
 class Order(Base):
     __tablename__ = "order"  # 修改表名为 "order"
 

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .models import Base
+from .base import Base
 
 
 class User(Base):
@@ -11,9 +11,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(128), unique=True, index=True)
-    username: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, comment="用户名"
-    )
+    username: Mapped[str | None] = mapped_column(String(64), nullable=True, comment="用户名")
     hashed_password = Column(String(128))
     is_active = Column(Boolean, default=True, nullable=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)

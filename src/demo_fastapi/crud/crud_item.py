@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert  # noqa
 
 from demo_fastapi.models import Item
 from demo_fastapi.schemas import ItemCreate
+from demo_fastapi.schemas.item import ItemUpsert
 
 
 def get_items(db: Session, skip: int = 0, limit: int = 100):
@@ -18,3 +20,7 @@ def create_user_item(db: Session, item: ItemCreate, user_id: int):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def upsert_item(db: Session, item: ItemUpsert, id: int):
+    pass

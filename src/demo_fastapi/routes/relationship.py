@@ -53,7 +53,18 @@ async def create_book_author(
     return book_author_db
 
 
-@router.get("/book_authors/{id}", summary="获取某图书的所以作者")
+@router.get("/book_authors", summary="获取某图书的所有作者")
+async def get_book_authors(db: AsyncSession = Depends(get_db_async)):
+    book_authors = await db.execute(
+        select(BookAuthor)
+        .options(joinedload(BookAuthor.book))
+        .options(joinedload(BookAuthor.author))
+    )
+    # res = book_authors.scalars().all()
+    return book_authors.scalars().all()
+
+
+@router.get("/book_authors/{id}", summary="按id获取某图书作者")
 async def get_authors_by_book_id_1(id: int, db: AsyncSession = Depends(get_db_async)):
     book_authors = await db.execute(
         select(BookAuthor)

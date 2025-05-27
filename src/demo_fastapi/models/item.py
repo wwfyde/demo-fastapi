@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
-                        func)
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .models import Base
+from .base import Base
 
 
 class Item(Base):

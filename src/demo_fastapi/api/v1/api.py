@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from demo_fastapi.api.v1.routers import demo, items, login, users
+from demo_fastapi.api.v1.routes import demo, items, login, users
 
 api_router = APIRouter()
 

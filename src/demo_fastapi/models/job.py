@@ -3,15 +3,13 @@ from datetime import datetime
 from sqlalchemy import DateTime, Integer, JSON, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .models import Base
+from .base import Base
 
 
 class Job(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     link: Mapped[str | None] = mapped_column(String(1024), nullable=True)
-    keywords: Mapped[list[str] | None] = mapped_column(
-        JSON, nullable=True, comment="关键词列表"
-    )
+    keywords: Mapped[list[str] | None] = mapped_column(JSON, nullable=True, comment="关键词列表")
 
     created_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

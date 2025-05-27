@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request
 from fastapi.applications import AppType
 from fastapi.exceptions import RequestValidationError
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
 from uvicorn import run
 
@@ -15,7 +16,7 @@ from demo_fastapi.api.v1.api import api_router
 from demo_fastapi.apps import features, pd_validate_serialize
 from demo_fastapi.core.config import settings
 from demo_fastapi.core.deps import get_logger, get_var_with_params
-from demo_fastapi.routers import router
+from demo_fastapi.routes import router
 
 log = get_logger(name="fastapi")
 
@@ -85,6 +86,15 @@ def create_app(lifespan: callable = lifespan):
         log.debug(f"Process time: {process_time * 1000}ms")
         return response
 
+    app.add_middleware(
+        CORSMiddleware,
+        # allow_origins=settings.CORS_ORIGINS,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     # register exception_handler
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(_, exc: RequestValidationError):
@@ -98,6 +108,7 @@ def create_app(lifespan: callable = lifespan):
         return RedirectResponse("/docs")
 
     @app.get("/hello")
+    @app.get("/demo")
     async def hello(request: Request):
         s: str = "世界"
         from package2 import hello
@@ -108,7 +119,7 @@ def create_app(lifespan: callable = lifespan):
         print(request.app.state.demo)
 
         demo()
-        return {"message": f"Hello, {s}!"}
+        return {"message": f"Hello, {s}!", "data": f"hello, {s}!"}
 
     @app.get("/deps_with_param")
     async def deps_with_param(param: str = Depends(get_var_with_params("你好"))):

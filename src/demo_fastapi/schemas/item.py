@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, JsonValue
+from pydantic.alias_generators import to_pascal
 
 
 class ItemBase(BaseModel, from_attributes=True):
@@ -24,7 +25,11 @@ class ItemModel(BaseModel, from_attributes=True):
     config: JsonValue
     owner_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_pascal,
+    )
 
 
 class ItemInDB(ItemBase):
@@ -50,7 +55,7 @@ class Item(ItemBase):
 
 class ItemCreate(ItemBase):
     """
-    创建时 ItemSchema, ItemValidater, CreateItemValidator
+    创建时 ItemRequest, ItemSchema, ItemValidater, CreateItemValidator
     """
 
     alias: str | None = None
@@ -77,9 +82,18 @@ class ItemUpdate(ItemBase):
     pass
 
 
+class ItemUpsert(ItemBase):
+    """
+    upsert 时
+    """
+
+    id: int | None = None
+    pass
+
+
 class ItemOut(ItemBase):
     """
-    输出时 ItemOut, `ItemResponse`, `ItemResult`, ~~ItemRead~~
+    输出时 ItemOut,`ItemPublic` ,`ItemResponse`, `ItemResult`,  ~~ItemRead~~
     """
 
     id: int

@@ -1,0 +1,1 @@
+Deprecate 不推荐, 请在 services写CURD 或直接写在api的route中 
