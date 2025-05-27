@@ -68,7 +68,8 @@ def run_migrations_offline() -> None:
     """
     print("run offline")
     # url = config.get_main_option("sqlalchemy.url")
-    url = settings.postgres_dsn
+    # TODO: important 使用同步引擎
+    url = settings.postgres_dsn_sync
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -91,7 +92,8 @@ def run_migrations_online() -> None:
     print("run online")
     # get url from settings
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = settings.postgres_dsn
+    # TODO: important 使用同步引擎
+    configuration["sqlalchemy.url"] = settings.postgres_dsn_sync
     connectable = engine_from_config(
         # config.get_section(config.config_ini_section, {}),
         configuration=configuration,

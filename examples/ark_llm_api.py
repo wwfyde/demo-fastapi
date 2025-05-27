@@ -32,10 +32,8 @@ async def main():
         api_key=settings.ark_api_key,
         base_url=settings.ark_base_url,
     )
-    model = next(
-        (model.value for model in settings.ark_models if model.name == "deepseek-v3"),
-        None,
-    )
+    # model = "doubao-1-5-vision-pro-32k-250115"
+    model = "deepseek-v3"
     print(model)
 
     stream = await client.chat.completions.create(
@@ -43,7 +41,7 @@ async def main():
         messages=[
             {
                 "role": "user",
-                "content": " this is test",
+                "content": "You are A helpful assistant.",
             }
         ],
         stream=True,

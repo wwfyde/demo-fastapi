@@ -7,21 +7,31 @@ authors = [
 ]
 dependencies = [
     "surreal_app",
-    "fastapi[all]>=0.115.0",
-    "pip>=24.2",
-    "sqlalchemy[asyncio]>=2.0.36",
-    "alembic>=1.13.2",
+    "sqlalchemy[asyncio]>=2.0.40",
+    "alembic>=1.15.2",
     "redis>=5.0.8",
-    "celery>=5.4.0",
     "python-jose[cryptography]>=3.3.0",
     "psycopg[binary,pool]>=3.2.1",
     "tqdm>=4.66.5",
-    "openai>=1.61.1",
     "python-dotenv[cli]>=1.0.1",
     "pyyaml>=6.0.2",
     "bcrypt>=4.2.1",
     "greenlet>=3.1.1",
     "fastapi-analytics>=1.2.3",
+    "celery>=5.5.1",
+    "fastapi>=0.115.12",
+    "websockets>=14",
+    "openai>=1.75.0",
+    "pymongo>=4.12.0",
+    "motor>=3.7.0",
+    "uvicorn>=0.34.2",
+    "pydantic-settings>=2.9.1",
+    "python-multipart>=0.0.20",
+    "asyncpg>=0.30.0",
+    "minio>=7.2.15",
+    "llama-index>=0.12.37",
+    "qdrant-client>=1.14.2",
+    "llama-index-embeddings-huggingface>=0.5.4",
 ]
 readme = "README.md"
 requires-python = ">= 3.12"
@@ -33,6 +43,8 @@ index-url = "https://mirrors.aliyun.com/pypi/simple"
 [project.scripts]
 package2 = "package2:main"
 init = "demo_fastapi.init_data:main"
+#start = "uvicorn demo_fastapi.main:app"         # 生产环境
+
 
 [tool.pdm.scripts]
 start = "uvicorn demo_fastapi.main:app"         # 生产环境
@@ -66,11 +78,15 @@ dev = [
     "ruff>=0.9.4",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.25.3",
+    "pip>=25.0.1",
+]
+tortoise = [
+    "tortoise-orm[asyncpg]>=0.25.0",
 ]
 
 [tool.uv.sources]
-#surreal_app = { workspace = true }
-surreal_app = { path = "packages/surreal_app" }
+surreal_app = { workspace = true }
+#surreal_app = { path = "packages/surreal_app" }
 #demo = { path = "packages/demo" }
 
 [tool.uv.workspace]
@@ -78,7 +94,12 @@ members = [
     #    "src/demo_fastapi",
     #    "src/package2",
     #    "examples",
-    #    "packages/*"
+    "packages/*"
+]
+
+exclude = [
+    "packages/demo",
+    #    "packages/surreal_app",
 ]
 
 [tool.ruff.lint]
@@ -89,5 +110,8 @@ ignore = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "module"
+
+[tool.ruff]
+line-length = 120
 
 

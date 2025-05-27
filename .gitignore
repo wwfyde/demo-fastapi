@@ -85,12 +85,21 @@ target/
 .env.prod
 .env.production
 *.local
-*.local.toml
+
 *.local.yml
 config.yml
 config.dev.yml
 config.prod.yml
 config.staging.yml
+config.test.yml
+
+config.toml
+*.local.toml
+config.dev.toml
+config.prod.toml
+config.staging.toml
+config.test.toml
+
 
 # Logs
 logs
