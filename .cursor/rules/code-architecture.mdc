@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# FastAPI项目代码架构
+
+## 目录结构
+
+项目遵循以下目录结构组织代码：
+
+- **src/demo_fastapi/**: 主应用程序目录
+  - **api/**: API路由和控制器
+  - **core/**: 核心配置和依赖项
+  - **models/**: 数据库模型
+  - **schemas/**: Pydantic数据验证模型
+  - **crud/**: 数据库CRUD操作
+  - **services/**: 业务逻辑服务
+  - **utils/**: 实用工具函数
+
+## 架构模式
+
+项目采用了分层架构设计：
+
+1. **API层**: 处理HTTP请求和响应，位于 [src/demo_fastapi/api/](mdc:src/demo_fastapi/api) 
+2. **服务层**: 包含业务逻辑，位于 [src/demo_fastapi/services/](mdc:src/demo_fastapi/services)
+3. **持久层**: 处理数据存储和检索，位于 [src/demo_fastapi/crud/](mdc:src/demo_fastapi/crud) 和 [src/demo_fastapi/models/](mdc:src/demo_fastapi/models)
+
+## 配置管理
+
+项目使用Pydantic-Settings进行配置管理，主要配置文件是 [config.yml](mdc:config.yml)，可以通过环境变量覆盖配置。配置读取逻辑位于 [src/demo_fastapi/core/config.py](mdc:src/demo_fastapi/core/config.py)。

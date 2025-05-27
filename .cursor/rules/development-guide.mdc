@@ -1,0 +1,45 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# FastAPI项目开发指南
+
+## 开发环境设置
+
+项目使用Python 3.12以上版本。依赖管理通过[pyproject.toml](mdc:pyproject.toml)文件配置。
+
+## 运行应用
+
+有以下几种方式运行应用：
+
+1. 直接通过Python运行（开发模式）:
+   ```bash
+   python -m uvicorn src.demo_fastapi.main:app --reload
+   ```
+
+2. 通过[commands.md](mdc:commands.md)中定义的命令运行:
+   ```bash
+   pdm run start
+   ```
+
+3. 使用Docker:
+   ```bash
+   docker-compose up
+   ```
+
+## 项目结构约定
+
+### 路由
+
+- 所有新的API路由应添加到适当的路由器文件中，并在[src/demo_fastapi/api/v1/api.py](mdc:src/demo_fastapi/api/v1/api.py)中注册
+
+### 数据库
+
+- 数据库迁移通过Alembic管理，配置文件为[alembic.ini](mdc:alembic.ini)
+- 所有数据库模型应定义在[src/demo_fastapi/models/](mdc:src/demo_fastapi/models)目录中
+
+### API约定
+
+- 使用Pydantic模型进行请求和响应验证
+- 业务逻辑应放在services层，而不是直接在路由处理程序中

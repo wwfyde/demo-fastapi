@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# FastAPI Demo Project Overview
+
+This project is a sample project based on the FastAPI framework, demonstrating how to build modern Python Web applications.
+
+## Project Structure
+
+The main entry point is [src/demo_fastapi/main.py](mdc:src/demo_fastapi/main.py), which configures and creates the FastAPI application instance using a factory function.
+
+Project configuration is located at [src/demo_fastapi/core/config.py](mdc:src/demo_fastapi/core/config.py), managed by Pydantic's settings.
+
+## Key Features
+
+- ORM database operations using SQLAlchemy
+- Configuration management using Pydantic-Settings
+- Modular API structure based on routers
+- User authentication and authorization functionality
+- Demonstration of asynchronous task processing
+- Examples of many-to-many relationships
+
+## API Structure
+
+API endpoints are defined in [src/demo_fastapi/api/v1/api.py](mdc:src/demo_fastapi/api/v1/api.py), including modules for users, login, demo, and project.
