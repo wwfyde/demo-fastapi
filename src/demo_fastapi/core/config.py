@@ -13,7 +13,7 @@ from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
-    YamlConfigSettingsSource,
+    TomlConfigSettingsSource,
 )
 
 base_dir: Path = Path(__file__).resolve().parent.parent
@@ -62,7 +62,7 @@ class RabbitMQ(BaseModel):
 
 class ItemConfig(BaseModel):
     name: str
-    price: float
+    price: float | None = None
     id: str = None
     model_config = ConfigDict(
         from_attributes=True,
@@ -107,18 +107,18 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     project_name: str = "demo-fastapi"
+    project_root: str | DirectoryPath = base_dir.parent
     base_dir: str | DirectoryPath = base_dir
     project_dir: str | DirectoryPath = base_dir.parent
     redis: RedisConfig = None
-    A: str = "initial"
-    lists: list[ItemConfig] = None
+    products: list[ItemConfig] | None = None
 
     first_superuser_email: str = Field(default=...)
     first_superuser_username: str = Field(default="admin")
     first_superuser_password: str = Field(default=...)
 
     # 阿里云OSS
-    aliyun_oss: AliyunOssConfig = None
+    oss: AliyunOssConfig = None
 
     # postgres
     postgres: PostgresConfig = None
@@ -143,6 +143,16 @@ class Settings(BaseSettings):
             ".env.staging.local",
             ".env.prod.local",
         ),
+        toml_file=[
+            "config.toml",
+            "config.dev.toml",
+            "config.staging.toml",
+            "config.prod.toml",
+            "config.local.toml",
+            "config.dev.local.toml",
+            "config.staging.local.toml",
+            "config.prod.local.toml",
+        ],
         yaml_file=[
             "config.yml",
             "config.dev.yml",
@@ -155,6 +165,9 @@ class Settings(BaseSettings):
         ],
         yaml_file_encoding="utf-8",
         env_file_encoding="utf-8",
+        # env_nested_max_split=2,
+        env_nested_delimiter="__",
+        # env_prefix="DEMO_FASTAPI_",  # 环境变量前缀
     )
 
     @classmethod
@@ -171,7 +184,8 @@ class Settings(BaseSettings):
         return (
             env_settings,
             dotenv_settings,
-            YamlConfigSettingsSource(settings_cls),
+            # YamlConfigSettingsSource(settings_cls),
+            TomlConfigSettingsSource(settings_cls),
         )
 
     @computed_field
@@ -182,6 +196,13 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def postgres_dsn(self) -> str:
+        # return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+        return f"postgresql+asyncpg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+
+    @computed_field
+    @property
+    def postgres_dsn_sync(self) -> str:
+        # return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
         return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
 
     # @computed_field
@@ -224,9 +245,7 @@ global_settings = GlobalSettings()
 if __name__ == "__main__":
     print(settings.redis_dsn)
     print(settings.postgres_dsn)
-    print(settings.A)
     print(settings.API_V1_STR)
-    print(settings.lists)
-    print(type(settings.lists[0].id))
-    print(global_settings.default.A)
+    print(settings.products)
+    print(type(settings.products[0].id))
     print(global_settings.extra.B)

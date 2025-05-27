@@ -1,0 +1,52 @@
+first_superuser_email = "admin@example.com"
+first_superuser_username = "admin"
+first_superuser_password = "admin@123456"
+
+[postgres]
+host = "127.0.0.1"
+port = 5432
+username = "postgres"
+password = "postgres"
+database = "postgres"
+pool_size = 30
+
+[redis]
+host = "127.0.0.1"
+port = 6379
+db = 0
+password = ""
+
+[mongo]
+host = "127.0.0.1"
+port = 27017
+collection = "demo_fastapi"
+database = "demo_fastapi"
+
+[mysql]
+host = "127.0.0.1"
+port = 3306
+username = "root"
+password = "wawawa"
+database = "demo_fastapi"
+
+[rabbitmq]
+username = "guest"
+password = "guest"
+host = "127.0.0.1"
+port = 5672
+exchange = "fastapi"
+virtual_host = "fastapi"
+connection_name = "[demo-fastapi]"
+
+[llm.dashscope]
+
+[[products]]
+name = "Hammer"
+id = 738594937
+color = "red"
+[[products]]
+name = "Nail"
+id = 284758393
+color = "gray"
+
+
