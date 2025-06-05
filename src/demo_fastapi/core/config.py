@@ -90,7 +90,7 @@ class APIAnalyticsConfig(BaseSettings):
 
 
 class TraceConfig(BaseSettings):
-    api_analytics: APIAnalyticsConfig
+    api_analytics: APIAnalyticsConfig | None = None
 
 
 class Settings(BaseSettings):
@@ -99,13 +99,14 @@ class Settings(BaseSettings):
         pass
 
     # nested_model: NestedModel
-    API_V1_STR: Final[str] = "/api/v1"
-    app_name: str = "demo 134"
+    api_prefix: Final[str] = "/api/v1"
+    api_key_header: Final[str] = "fullspeed"
+    app_name: str = "demo-fastapi"
     # SECRET_KEY: str = secrets.token_urlsafe(32)
     # use "openssl rand -hex 32" to generate a secure random secret key
     secret_key: str = "7212718542579599fe8923e3bf1632862d13f636def7d0cdd60a1765a10553d5"
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    access_token_expire_days: int = 30
     project_name: str = "demo-fastapi"
     project_root: str | DirectoryPath = base_dir.parent
     base_dir: str | DirectoryPath = base_dir
@@ -125,7 +126,7 @@ class Settings(BaseSettings):
     # mysql: MySQLSettings
     # rabbitmq: RabbitMQ
 
-    trace: TraceConfig = None
+    trace: TraceConfig | None = None
 
     # TODO set container ip
     log_file_path: str | DirectoryPath = base_dir.joinpath("log")
@@ -245,7 +246,7 @@ global_settings = GlobalSettings()
 if __name__ == "__main__":
     print(settings.redis_dsn)
     print(settings.postgres_dsn)
-    print(settings.API_V1_STR)
+    print(settings.api_prefix)
     print(settings.products)
     print(type(settings.products[0].id))
     print(global_settings.extra.B)

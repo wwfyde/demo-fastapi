@@ -9,8 +9,9 @@ import redis as redis_sync
 import redis.asyncio as redis
 from celery import Celery
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import APIKeyHeader, OAuth2AuthorizationCodeBearer, OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session
 from starlette import status
@@ -19,6 +20,7 @@ from demo_fastapi.core.cache import pool, pool_sync
 from demo_fastapi.core.config import settings
 from demo_fastapi.core.db import async_engine, engine
 from demo_fastapi.core.decorators import time_decorator
+from demo_fastapi.models import User
 
 
 # redis cache
@@ -54,16 +56,20 @@ DBSession = Annotated[Session, Depends(get_db)]
 
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{os.getenv('ROOT_PATH', '') or settings.API_V1_STR}/users/token"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{os.getenv('ROOT_PATH', '') or settings.api_prefix}/auth/token")
+
+oauth2_scheme_bearer = OAuth2AuthorizationCodeBearer(
+    authorizationUrl="",  # TODO 设置授权URL, 例如: "https://example.com/oauth/authorize"
+    tokenUrl=f"{os.getenv('ROOT_PATH', '') or settings.api_prefix}/auth/token",
+    refreshUrl="",  # TODO 设置刷新令牌的URL, 例如: "https://example.com/oauth/token"
 )
+
+header_scheme = APIKeyHeader(name="X-Api-Key")
 
 
 async def verify_token(token: Annotated[str, Depends(oauth2_scheme)]) -> bool:
     try:
-        payload = jwt.decode(
-            token, settings.secret_key, algorithms=[settings.jwt_algorithm]
-        )
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(
@@ -94,6 +100,16 @@ async def verify_token(token: Annotated[str, Depends(oauth2_scheme)]) -> bool:
         )
 
 
+async def verify_header_token(token: Annotated[str, Depends(header_scheme)]) -> str:
+    if token != settings.api_key_header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid header token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return token
+
+
 async def get_db_async() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
@@ -103,9 +119,7 @@ DBSessionAsync = Annotated[AsyncSession, Depends(get_db_async)]
 
 
 async def get_async_redis_cache() -> AsyncGenerator[redis.Redis, None]:
-    pool = redis.ConnectionPool.from_url(
-        settings.redis_dsn, decode_responses=True, protocol=3
-    )
+    pool = redis.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3)
     r = redis.Redis(connection_pool=pool, decode_responses=True, protocol=3)
     async with r:
         print(await r.get("a"))
@@ -113,9 +127,7 @@ async def get_async_redis_cache() -> AsyncGenerator[redis.Redis, None]:
 
 
 async def get_async_redis_cache2() -> AsyncGenerator[redis.Redis, None]:
-    pool = redis.ConnectionPool.from_url(
-        settings.redis_dsn, decode_responses=True, protocol=3
-    )
+    pool = redis.ConnectionPool.from_url(settings.redis_dsn, decode_responses=True, protocol=3)
     r = redis.Redis(connection_pool=pool, decode_responses=True, protocol=3)
     try:
         yield r
@@ -123,12 +135,10 @@ async def get_async_redis_cache2() -> AsyncGenerator[redis.Redis, None]:
         await r.close()
 
 
-def get_logger(name: str = __name__, write_to_file: bool = False) -> logging.Logger:
+def create_logger(name: str = __name__, write_to_file: bool = False) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)  # 设置日志级别
-    formatter = logging.Formatter(
-        "%(asctime)s | %(name)s | %(levelname)s | %(message)s [in %(pathname)s:%(lineno)d]"
-    )
+    formatter = logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s [in %(pathname)s:%(lineno)d]")
 
     if write_to_file is True:
         log_file = settings.log_file_path.joinpath(f"{name}.log")
@@ -141,6 +151,13 @@ def get_logger(name: str = __name__, write_to_file: bool = False) -> logging.Log
     console_handler.setLevel(logging.DEBUG)  # 设置处理器的日志级别
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+    return logger
+
+
+logger = create_logger(name=settings.app_name, write_to_file=True)
+
+
+def get_logger() -> logging.Logger:
     return logger
 
 
@@ -218,6 +235,44 @@ def get_var_with_params(param: str):
 async def main():
     async with await get_redis_cache().__anext__() as r:
         print(await r.get("a"))
+
+
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)], session: AsyncSession = Depends(get_db_async)
+) -> User:
+    """
+    获取当前用户
+    :param session:
+    :param token:
+    :return:
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    async with session:
+        stmt = select(User).where(User.username == username)
+        result = await session.execute(stmt)
+        user = result.scalars().one_or_none()
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
 
 
 if __name__ == "__main__":

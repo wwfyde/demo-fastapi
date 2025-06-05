@@ -15,7 +15,7 @@ from demo_fastapi.core.config import settings
 
 def dumps(obj: Mapping) -> str:
     # return orjson.dumps(obj, option=orjson.OPT_SORT_KEYS | orjson.OPT_NON_STR_KEYS).decode('utf-8')
-    return json.dumps(obj, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
 
 
 # asyncio_engine = create_async_engine(
